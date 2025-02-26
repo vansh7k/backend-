@@ -27,15 +27,24 @@ app.post('/signup', async (req, res) => {
     return res.status(400).json({ error: "Username cannot be empty" });
   }
 
-  if (!email) {
-    return res.status(400).json({ error: "Email cannot be empty" });
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Regex for email validation
+  if (!email || !emailRegex.test(email)) {
+
+    return res.status(400).json({ error: "Email cannot be empty or invalid format" });
+
   }
   
   if (!password || password.length < 8 || password.length > 16) {
     return res.status(400).json({ error: "Password length should be greater than 8 or less than or equal to 16" });
   }
 
+  const existingUser = await User.findOne({ username });
+  if (existingUser) {
+    return res.status(400).json({ error: "Username already exists" });
+  }
+
   const newUser = new User({
+
     username,
     email,
     password,      
